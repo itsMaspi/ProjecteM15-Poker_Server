@@ -1,4 +1,5 @@
 ﻿using Microsoft.Web.WebSockets;
+using Poker_Server.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,6 +37,7 @@ namespace Poker_Server.Controllers
                 Sockets.Broadcast(_nom + " s'ha connectat.");
                 Sockets.Add(this);
                 Sockets.Broadcast("/supersecret " + CountConnectedUsers());
+                Send(Cards.AceSpades);
                 Send("Benvingut " + _nom + "!");
             }
 
