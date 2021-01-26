@@ -7,6 +7,8 @@ namespace Poker_Server.Models
 {
 	public static class Cards
 	{
+		public static string Cover       = "\U0001F0A0";
+
 		public static string AceSpades   = "\U0001F0A1";
 		public static string TwoSpades   = "\U0001F0A2";
 		public static string ThreeSpades = "\U0001F0A3";
@@ -62,5 +64,49 @@ namespace Poker_Server.Models
 		public static string JackClubs  = "\U0001F0DB";
 		public static string QueenClubs = "\U0001F0DD";
 		public static string KingClubs  = "\U0001F0DE";
+
+		public static string[] RedCards = { AceDiamonds,   AceHearts,
+											TwoDiamonds,   TwoHearts,
+											ThreeDiamonds, ThreeHearts,
+											FourDiamonds,  FourHearts,
+											FiveDiamonds,  FiveHearts,
+											SixDiamonds,   SixHearts,
+											SevenDiamonds, SevenHearts,
+											EightDiamonds, EightHearts,
+											NineDiamonds,  NineHearts,
+											TenDiamonds,   TenHearts,
+											JackDiamonds,  JackHearts,
+											QueenDiamonds, QueenHearts,
+											KingDiamonds,  KingHearts  };
+
+		public static string[] BlackCards = { AceClubs   ,   AceSpades   ,
+											  TwoClubs   ,   TwoSpades   ,
+											  ThreeClubs ,   ThreeSpades ,
+											  FourClubs  ,   FourSpades  ,
+											  FiveClubs  ,   FiveSpades  ,
+										  	  SixClubs   ,   SixSpades   ,
+											  SevenClubs ,   SevenSpades ,
+											  EightClubs ,   EightSpades ,
+											  NineClubs  ,   NineSpades  ,
+											  TenClubs   ,   TenSpades   ,
+											  JackClubs  ,   JackSpades  ,
+											  QueenClubs ,   QueenSpades ,
+											  KingClubs  ,   KingSpades  };
+
+		public static List<string> GenerarBaralla()
+		{
+			List<string> baralla = new List<string>();
+			baralla.AddRange(BlackCards);
+			baralla.AddRange(RedCards);
+			Random r = new Random();
+			for (int i = 0; i < baralla.Count; i++)
+			{
+				int k = r.Next(baralla.Count-i);
+				var t = baralla[k];
+				baralla[k] = baralla[i];
+				baralla[i] = t;
+			}
+			return baralla;
+		}
 	}
 }

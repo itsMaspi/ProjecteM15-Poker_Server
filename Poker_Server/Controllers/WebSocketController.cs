@@ -22,9 +22,17 @@ namespace Poker_Server.Controllers
 
         private class SocketHandler : WebSocketHandler
         {
-            private static readonly WebSocketCollection Sockets = new WebSocketCollection();
+            #region Command prefixes
+            private static readonly string PRE_UsersOnline = "/online ";
+            private static readonly string PRE_StartGame = "/start ";
+			#endregion
+
+			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
 
             private readonly string _nom;
+
+            private Random random = new Random();
+            private static List<string> Baralla = Cards.GenerarBaralla();
 
             public SocketHandler(string nom)
             {
@@ -36,8 +44,12 @@ namespace Poker_Server.Controllers
                 // Quan es connecta un nou usuari: cal afegir el SocketHandler a la Collection, notificar a tothom la incorporació i donar-li la benvinguda
                 Sockets.Broadcast(_nom + " s'ha connectat.");
                 Sockets.Add(this);
-                Sockets.Broadcast("/supersecret " + CountConnectedUsers());
-                Send(Cards.AceSpades);
+                Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
+                Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+				if (Sockets.Count >= 2)
+				{
+                    Sockets.Broadcast("Es podria començar la partida...");
+				}
                 Send("Benvingut " + _nom + "!");
             }
 
@@ -49,6 +61,11 @@ namespace Poker_Server.Controllers
                     string noms = CountConnectedUsers();
                     Send("Persones conectades: " + noms);
                 }
+                else if (missatge.StartsWith(PRE_StartGame))
+				{
+                    // llista de noms per controlar que si tots posen /start el joc començi
+                    StartGame();
+				}
                 else
                 {
                     Sockets.Broadcast(_nom + ": " + missatge);
@@ -60,7 +77,7 @@ namespace Poker_Server.Controllers
                 // Quan un usuari desconnecta, cal acomiadar-se'n, esborrar-ne el SocketHandler de la Collection i notificar a la resta que marxa
                 Send("Adéu " + _nom + "...");
                 Sockets.Remove(this);
-                Sockets.Broadcast("/supersecret " + CountConnectedUsers());
+                Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
                 Sockets.Broadcast(_nom + " s'ha desconnectat.");
             }
 
@@ -77,10 +94,18 @@ namespace Poker_Server.Controllers
                 }
                 catch (ArgumentOutOfRangeException e)
                 {
+                    Console.WriteLine(e.Message);
                     return "";
                 }
 
             }
+
+            private void StartGame()
+			{
+                // donar dues cartes a cada jugador
+                // mostrar una carta perque els jugadors la agafin
+                // al cap d'un temps que la tregui i en mostri una altra
+			}
         }
     }
 }
