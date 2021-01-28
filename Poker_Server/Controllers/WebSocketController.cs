@@ -21,12 +21,14 @@ namespace Poker_Server.Controllers
             HttpContext.Current.AcceptWebSocketRequest(new SocketHandler(nom)); return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
         }
         private static List<string> wantStart = new List<string>();
+        private static int idxCarta = 0;
         private class SocketHandler : WebSocketHandler
         {
             #region Command prefixes
             private static readonly string PRE_UsersOnline = "/online ";
             private static readonly string PRE_StartGame = "/start";
-            private static readonly string PRE_SendCard = "TODO";
+            private static readonly string PRE_ShowCard = "/showcard ";
+            private static readonly string PRE_SendCard = "/sendcard ";
 			#endregion
             
 			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
@@ -54,10 +56,15 @@ namespace Poker_Server.Controllers
 				}
                 else
 				{
+                    if (thread != null && thread.IsAlive)
+                    {
+                        thread.Abort();
+                        Sockets.Broadcast("Countdown cancelled...");
+                    }
                     Sockets.Broadcast(_nom + " has connected.");
                     Sockets.Add(this);
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                    Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+                    //Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
                     if (Sockets.Count == 2)
                     {
                         Sockets.Broadcast("You can start the game typing /start in the chat...");
@@ -140,6 +147,9 @@ namespace Poker_Server.Controllers
                 // al cap d'un temps que la tregui i en mostri una altra
                 Sockets.Broadcast("Game started :)");
                 wantStart.Clear();
+
+                SendInitialCards();
+                ShowCard();
 			}
 
             private void Countdown()
@@ -153,12 +163,24 @@ namespace Poker_Server.Controllers
 			}
 
 
-            private void sendInitialCards()
+            private void SendInitialCards()
             {
-                Send("/givecard " + Baralla.ElementAt(random.Next(Baralla.Count)));
-                Send("/givecard " + Baralla.ElementAt(random.Next(Baralla.Count)));
-
+				foreach (var player in Sockets)
+				{
+                    SendCard();
+                    SendCard();
+				}
             }
+
+            private void SendCard()
+			{
+                Send(PRE_SendCard + Baralla.ElementAt(idxCarta++)); // !!!!!!!! CONTROLAR QUE NO ARRIBI AL FINAL DE LA BARALLA
+			}
+
+            private void ShowCard()
+			{
+                Sockets.Broadcast(PRE_ShowCard + Baralla.ElementAt(idxCarta++));// !!!!! same que send card
+			}
         }
     }
 }
