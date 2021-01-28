@@ -45,7 +45,8 @@ namespace Poker_Server.Controllers
                 Sockets.Broadcast(_nom + " s'ha connectat.");
                 Sockets.Add(this);
                 Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+                sendInitialCards();
+                //Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
 				if (Sockets.Count >= 2)
 				{
                     Sockets.Broadcast("Es podria començar la partida...");
@@ -106,6 +107,14 @@ namespace Poker_Server.Controllers
                 // mostrar una carta perque els jugadors la agafin
                 // al cap d'un temps que la tregui i en mostri una altra
 			}
+
+
+            private void sendInitialCards()
+            {
+                Send("/givecard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+                Send("/givecard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+
+            }
         }
     }
 }
