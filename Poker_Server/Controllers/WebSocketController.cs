@@ -151,6 +151,14 @@ namespace Poker_Server.Controllers
 				}
                 StartGame();
 			}
+
+
+            private void sendInitialCards()
+            {
+                Send("/givecard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+                Send("/givecard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+
+            }
         }
     }
 }
