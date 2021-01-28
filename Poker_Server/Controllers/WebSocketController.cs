@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Web;
 using System.Web.Http;
 using System.Web.Mvc;
@@ -19,20 +20,25 @@ namespace Poker_Server.Controllers
 
             HttpContext.Current.AcceptWebSocketRequest(new SocketHandler(nom)); return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
         }
-
+        private static List<string> wantStart = new List<string>();
         private class SocketHandler : WebSocketHandler
         {
             #region Command prefixes
             private static readonly string PRE_UsersOnline = "/online ";
-            private static readonly string PRE_StartGame = "/start ";
+            private static readonly string PRE_StartGame = "/start";
+            private static readonly string PRE_SendCard = "TODO";
 			#endregion
-
+            
 			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
 
             private readonly string _nom;
 
             private Random random = new Random();
             private static List<string> Baralla = Cards.GenerarBaralla();
+            
+            private int countdownSecs = 5;
+
+            Thread thread;
 
             public SocketHandler(string nom)
             {
@@ -41,30 +47,54 @@ namespace Poker_Server.Controllers
 
             public override void OnOpen()
             {
-                // Quan es connecta un nou usuari: cal afegir el SocketHandler a la Collection, notificar a tothom la incorporació i donar-li la benvinguda
-                Sockets.Broadcast(_nom + " s'ha connectat.");
-                Sockets.Add(this);
-                Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
-				if (Sockets.Count >= 2)
+				if (Sockets.Count >= 6)
 				{
-                    Sockets.Broadcast("Es podria començar la partida...");
+                    Send("Server is full. Try again later...");
+                    
 				}
-                Send("Benvingut " + _nom + "!");
+                else
+				{
+                    Sockets.Broadcast(_nom + " has connected.");
+                    Sockets.Add(this);
+                    Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
+                    Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
+                    if (Sockets.Count == 2)
+                    {
+                        Sockets.Broadcast("You can start the game typing /start in the chat...");
+                    }
+                    else if (Sockets.Count > 2)
+					{
+                        Send("You can start the game typing /start in the chat...");
+					}
+                }
             }
 
             public override void OnMessage(string missatge)
             {
-                // Quan un usuari envia un missatge, cal que tothom el rebi
-                if (missatge == "???")
+                if (missatge == PRE_UsersOnline)
                 {
                     string noms = CountConnectedUsers();
-                    Send("Persones conectades: " + noms);
+                    Send("Online users: " + noms);
                 }
                 else if (missatge.StartsWith(PRE_StartGame))
 				{
-                    // llista de noms per controlar que si tots posen /start el joc començi
-                    StartGame();
+					if (!wantStart.Contains(_nom))
+					{
+                        wantStart.Add(_nom);
+					}
+                    else
+					{
+                        Send("You already voted to start...");
+					}
+					if (Sockets.Count > 1 && wantStart.Count == Sockets.Count)
+					{
+                        thread = new Thread(new ThreadStart(Countdown));
+                        countdownSecs = 5;
+                        thread.Start(); // start the game after 5 secs
+                    }
+					else {
+                        Sockets.Broadcast("Petition to start the game (" + wantStart.Count + "/" + Sockets.Count + ")");
+                    }
 				}
                 else
                 {
@@ -74,11 +104,15 @@ namespace Poker_Server.Controllers
 
             public override void OnClose()
             {
-                // Quan un usuari desconnecta, cal acomiadar-se'n, esborrar-ne el SocketHandler de la Collection i notificar a la resta que marxa
-                Send("Adéu " + _nom + "...");
                 Sockets.Remove(this);
                 Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                Sockets.Broadcast(_nom + " s'ha desconnectat.");
+                Sockets.Broadcast(_nom + " has disconnected."); // !!! quan està ple el que s'intenta connectar pero no hi ha lloc, si es desconnecta surt aixo igualment !!!
+				if (thread != null && thread.IsAlive)
+				{
+                    thread.Abort();
+                    Sockets.Broadcast("Countdown cancelled...");
+                    wantStart.Remove(_nom);
+				}
             }
 
             private string CountConnectedUsers()
@@ -97,7 +131,6 @@ namespace Poker_Server.Controllers
                     Console.WriteLine(e.Message);
                     return "";
                 }
-
             }
 
             private void StartGame()
@@ -105,6 +138,18 @@ namespace Poker_Server.Controllers
                 // donar dues cartes a cada jugador
                 // mostrar una carta perque els jugadors la agafin
                 // al cap d'un temps que la tregui i en mostri una altra
+                Sockets.Broadcast("Game started :)");
+                wantStart.Clear();
+			}
+
+            private void Countdown()
+			{
+				for (int i = countdownSecs; i > 0; i--)
+				{
+                    Sockets.Broadcast("Starting the game in " + i);
+                    Thread.Sleep(1000);
+				}
+                StartGame();
 			}
         }
     }
