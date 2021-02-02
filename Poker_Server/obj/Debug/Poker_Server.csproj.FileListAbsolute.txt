@@ -255,4 +255,3 @@ C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Deb
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.csproj.CopyComplete
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.dll
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.pdb
-C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.csprojAssemblyReference.cache

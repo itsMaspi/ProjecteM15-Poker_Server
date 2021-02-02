@@ -32,6 +32,13 @@ namespace Poker_Server.Controllers
             
 			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
 
+            #region Command prefixes
+            private static readonly string PRE_UsersOnline = "/online";
+            private static readonly string PRE_ShowCard = "/showcard";
+            private static readonly string PRE_StartGame = "/start";
+            private static readonly string PRE_SendCard = "/sendcard";
+            #endregion
+
             private readonly string _nom;
 
             private Random random = new Random();
