@@ -251,8 +251,8 @@ C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\bin\Sys
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\bin\System.Web.WebPages.Razor.xml
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\bin\Antlr3.Runtime.pdb
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
-C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.csprojAssemblyReference.cache
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.csproj.CoreCompileInputs.cache
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.csproj.CopyComplete
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.dll
 C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.pdb
+C:\Users\Bernat M\source\repos\M15\ProjecteM15-Poker_Server\Poker_Server\obj\Debug\Poker_Server.csprojAssemblyReference.cache

@@ -18,18 +18,17 @@ namespace Poker_Server.Controllers
         {
             // La crida al websocket serà del tipus   ws://host:port/api/websocket?nom=Pere
 
-            HttpContext.Current.AcceptWebSocketRequest(new SocketHandler(nom)); return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
+            
+            HttpContext.Current.AcceptWebSocketRequest(new SocketHandler(nom));
+            return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
+
+
         }
         private static List<string> wantStart = new List<string>();
         private static int idxCarta = 0;
         private class SocketHandler : WebSocketHandler
         {
-            #region Command prefixes
-            private static readonly string PRE_UsersOnline = "/online ";
-            private static readonly string PRE_StartGame = "/start";
-            private static readonly string PRE_ShowCard = "/showcard ";
-            private static readonly string PRE_SendCard = "/sendcard ";
-			#endregion
+
             
 			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
 
