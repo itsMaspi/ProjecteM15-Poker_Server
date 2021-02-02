@@ -41,6 +41,7 @@ namespace Poker_Server.Controllers
             private int countdownSecs = 5;
 
             Thread thread;
+            Thread tShowCards; // thread per anar donant cartes
 
             public SocketHandler(string nom)
             {
@@ -63,6 +64,7 @@ namespace Poker_Server.Controllers
                     }
                     Sockets.Broadcast(_nom + " has connected.");
                     Sockets.Add(this);
+                    Send("Connected!");
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
                     //Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
                     if (Sockets.Count == 2)
@@ -167,8 +169,10 @@ namespace Poker_Server.Controllers
             {
 				foreach (var player in Sockets)
 				{
-                    SendCard();
-                    SendCard();
+                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
+                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
+                    //SendCard();
+                    //SendCard();
 				}
             }
 
