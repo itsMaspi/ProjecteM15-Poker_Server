@@ -26,6 +26,10 @@ namespace Poker_Server.Controllers
         }
         private static List<string> wantStart = new List<string>();
         private static int idxCarta = 0;
+
+        public static Thread thread;
+        public static Thread tShowCards;
+
         private class SocketHandler : WebSocketHandler
         {
 
@@ -45,10 +49,10 @@ namespace Poker_Server.Controllers
             private Random random = new Random();
             private static List<string> Baralla = Cards.GenerarBaralla();
             
-            private int countdownSecs = 5;
+            private int countdownSecs = 3;
 
-            Thread thread;
-            Thread tShowCards; // thread per anar donant cartes
+            
+            
 
             public SocketHandler(string nom)
             {
@@ -119,7 +123,6 @@ namespace Poker_Server.Controllers
                         tShowCards.Abort();
                         idxCarta--;
                         SendCard(this);
-                        tShowCards = null;
                         tShowCards = new Thread(new ThreadStart(ShowCards));
                         tShowCards.Start();
 					}
@@ -181,7 +184,6 @@ namespace Poker_Server.Controllers
 				{
                     Sockets.Broadcast("Starting the game in " + i);
                     Thread.Sleep(1000);
-                    
 				}
                 StartGame();
 			}
@@ -194,7 +196,6 @@ namespace Poker_Server.Controllers
                     //Envia les dues cartes inicials al player
                     SendCard((SocketHandler)player);
                     SendCard((SocketHandler)player);
-
                 }
             }
 
@@ -210,22 +211,30 @@ namespace Poker_Server.Controllers
             private void SendCard(SocketHandler player)
 			{
                 //Comprova que no es surti de la baralla
-                if (idxCarta<= Baralla.Count())
+                if (idxCarta < Baralla.Count())
                 {
                     //Envia la carta al player
                     player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
 
                     //Elimina aquesta carta de la baralla
+                    Baralla.RemoveAt(--idxCarta);
 
-                    Baralla.RemoveAt(idxCarta);
-                    //Baralla.RemoveRange(idxCarta--, 1);
-
-                }
+                } else
+				{
+                    idxCarta = 0;
+				}
 			}
 
             private void ShowCard()
 			{
-                Sockets.Broadcast(PRE_ShowCard + Baralla.ElementAt(idxCarta++));// !!!!! same que send card
+				if (idxCarta < Baralla.Count())
+				{
+                    Sockets.Broadcast(PRE_ShowCard + Baralla.ElementAt(idxCarta++));
+                }
+                else
+				{
+                    idxCarta = 0;
+				}
 			}
         }
     }
