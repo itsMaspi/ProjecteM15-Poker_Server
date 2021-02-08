@@ -26,6 +26,7 @@ namespace Poker_Server.Controllers
         }
         private static List<string> wantStart = new List<string>();
         private static int idxCarta = 0;
+        private static bool isPlaying = false;
 
         public static Thread thread;
         public static Thread tShowCards;
@@ -42,6 +43,7 @@ namespace Poker_Server.Controllers
             private static readonly string PRE_StartGame = "/start";
             private static readonly string PRE_SendCard = "/sendcard";
             private static readonly string PRE_DemandCard = "/card";
+            private static readonly string PRE_ResetGame = "/reset";
             #endregion
 
             private readonly string _nom;
@@ -65,6 +67,10 @@ namespace Poker_Server.Controllers
 				{
                     Send("Server is full. Try again later...");
                     
+				}
+                else if (isPlaying)
+				{
+                    Send("A match is being played right now. Try again later...");
 				}
                 else
 				{
@@ -96,7 +102,7 @@ namespace Poker_Server.Controllers
                     string noms = CountConnectedUsers();
                     Send("Online users: " + noms);
                 }
-                else if (missatge.StartsWith(PRE_StartGame))
+                else if (missatge.StartsWith(PRE_StartGame) && !isPlaying)
 				{
 					if (!wantStart.Contains(_nom))
 					{
@@ -144,6 +150,18 @@ namespace Poker_Server.Controllers
                     Sockets.Broadcast("Countdown cancelled...");
                     wantStart.Remove(_nom);
 				}
+				if (tShowCards != null && tShowCards.IsAlive)
+				{
+                    tShowCards.Abort();
+				}
+				if (isPlaying)
+				{
+                    isPlaying = false;
+                    Sockets.Broadcast(PRE_ResetGame); // Dir als clients que resetegin la interficie
+                    idxCarta = 0;
+                    Baralla = Cards.GenerarBaralla();
+                    
+				}
             }
 
             private string CountConnectedUsers()
@@ -166,9 +184,7 @@ namespace Poker_Server.Controllers
 
             private void StartGame()
 			{
-                // donar dues cartes a cada jugador
-                // mostrar una carta perque els jugadors la agafin
-                // al cap d'un temps que la tregui i en mostri una altra
+                isPlaying = true;
                 Sockets.Broadcast("Game started :)");
                 wantStart.Clear();
 
