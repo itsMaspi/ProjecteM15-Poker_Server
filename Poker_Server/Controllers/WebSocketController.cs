@@ -37,6 +37,7 @@ namespace Poker_Server.Controllers
             private static readonly string PRE_ShowCard = "/showcard";
             private static readonly string PRE_StartGame = "/start";
             private static readonly string PRE_SendCard = "/sendcard";
+            private static readonly string PRE_DemandCard = "/card";
             #endregion
 
             private readonly string _nom;
@@ -111,6 +112,18 @@ namespace Poker_Server.Controllers
                         Sockets.Broadcast("Petition to start the game (" + wantStart.Count + "/" + Sockets.Count + ")");
                     }
 				}
+                else if (missatge.StartsWith(PRE_DemandCard))
+				{
+					if (tShowCards.IsAlive)
+					{
+                        tShowCards.Abort();
+                        idxCarta--;
+                        SendCard(this);
+                        tShowCards = null;
+                        tShowCards = new Thread(new ThreadStart(ShowCards));
+                        tShowCards.Start();
+					}
+				}
                 else
                 {
                     Sockets.Broadcast(_nom + ": " + missatge);
@@ -157,7 +170,9 @@ namespace Poker_Server.Controllers
                 wantStart.Clear();
 
                 SendInitialCards();
-                ShowCard();
+                tShowCards = new Thread(new ThreadStart(ShowCards));
+                tShowCards.Start();
+                
 			}
 
             private void Countdown()
@@ -166,6 +181,7 @@ namespace Poker_Server.Controllers
 				{
                     Sockets.Broadcast("Starting the game in " + i);
                     Thread.Sleep(1000);
+                    
 				}
                 StartGame();
 			}
@@ -182,9 +198,18 @@ namespace Poker_Server.Controllers
 				}
             }
 
-            private void SendCard()
+            private void ShowCards()
 			{
-                Send(PRE_SendCard + Baralla.ElementAt(idxCarta++)); // !!!!!!!! CONTROLAR QUE NO ARRIBI AL FINAL DE LA BARALLA
+                while (true)
+				{
+                    ShowCard();
+                    Thread.Sleep(10000);
+                }
+			}
+
+            private void SendCard(SocketHandler player)
+			{
+                player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++)); // !!!!!!!! CONTROLAR QUE NO ARRIBI AL FINAL DE LA BARALLA
 			}
 
             private void ShowCard()
