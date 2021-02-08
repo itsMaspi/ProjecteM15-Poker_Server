@@ -191,11 +191,11 @@ namespace Poker_Server.Controllers
             {
 				foreach (var player in Sockets)
 				{
-                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
-                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
-                    //SendCard();
-                    //SendCard();
-				}
+                    //Envia les dues cartes inicials al player
+                    SendCard((SocketHandler)player);
+                    SendCard((SocketHandler)player);
+
+                }
             }
 
             private void ShowCards()
@@ -206,10 +206,21 @@ namespace Poker_Server.Controllers
                     Thread.Sleep(10000);
                 }
 			}
-
+            
             private void SendCard(SocketHandler player)
 			{
-                player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++)); // !!!!!!!! CONTROLAR QUE NO ARRIBI AL FINAL DE LA BARALLA
+                //Comprova que no es surti de la baralla
+                if (idxCarta<= Baralla.Count())
+                {
+                    //Envia la carta al player
+                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
+
+                    //Elimina aquesta carta de la baralla
+
+                    Baralla.RemoveAt(idxCarta);
+                    //Baralla.RemoveRange(idxCarta--, 1);
+
+                }
 			}
 
             private void ShowCard()
