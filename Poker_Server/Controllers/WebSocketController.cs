@@ -44,6 +44,7 @@ namespace Poker_Server.Controllers
             private static readonly string PRE_SendCard = "/sendcard";
             private static readonly string PRE_DemandCard = "/card";
             private static readonly string PRE_ResetGame = "/reset";
+            private static readonly string PRE_CloseConnection = "/youshallnotpass";
             #endregion
 
             private readonly string _nom;
@@ -66,12 +67,13 @@ namespace Poker_Server.Controllers
 				if (Sockets.Count >= 6)
 				{
                     Send("Server is full. Try again later...");
-                    
+                    Send(PRE_CloseConnection);
 				}
                 else if (isPlaying)
 				{
                     Send("A match is being played right now. Try again later...");
-				}
+                    Send(PRE_CloseConnection);
+                }
                 else
 				{
                     if (thread != null && thread.IsAlive)
@@ -141,27 +143,29 @@ namespace Poker_Server.Controllers
 
             public override void OnClose()
             {
-                Sockets.Remove(this);
-                Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                Sockets.Broadcast(_nom + " has disconnected."); // !!! quan està ple el que s'intenta connectar pero no hi ha lloc, si es desconnecta surt aixo igualment !!!
-				if (thread != null && thread.IsAlive)
+				if (Sockets.Contains(this)) // Si el que es desconnecta realment s'ha connectat
 				{
-                    thread.Abort();
-                    Sockets.Broadcast("Countdown cancelled...");
-                    wantStart.Remove(_nom);
-				}
-				if (tShowCards != null && tShowCards.IsAlive)
-				{
-                    tShowCards.Abort();
-				}
-				if (isPlaying)
-				{
-                    isPlaying = false;
-                    Sockets.Broadcast(PRE_ResetGame); // Dir als clients que resetegin la interficie
-                    idxCarta = 0;
-                    Baralla = Cards.GenerarBaralla();
-                    
-				}
+                    Sockets.Remove(this);
+                    Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
+                    Sockets.Broadcast(_nom + " has disconnected."); // !!! quan està ple el que s'intenta connectar pero no hi ha lloc, si es desconnecta surt aixo igualment !!!
+                    if (thread != null && thread.IsAlive)
+                    {
+                        thread.Abort();
+                        Sockets.Broadcast("Countdown cancelled...");
+                        wantStart.Remove(_nom);
+                    }
+                    if (tShowCards != null && tShowCards.IsAlive)
+                    {
+                        tShowCards.Abort();
+                    }
+                    if (isPlaying)
+                    {
+                        isPlaying = false;
+                        Sockets.Broadcast(PRE_ResetGame); // Dir als clients que resetegin la interficie
+                        idxCarta = 0;
+                        Baralla = Cards.GenerarBaralla();
+                    }
+                }
             }
 
             private string CountConnectedUsers()
