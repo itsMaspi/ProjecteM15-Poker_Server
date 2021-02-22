@@ -24,42 +24,42 @@ namespace Poker_Server.Controllers
 
 
         }
+
+        #region Command prefixes
+        private static readonly string PRE_UsersOnline = "/online";
+        private static readonly string PRE_ShowCard = "/showcard";
+        private static readonly string PRE_StartGame = "/start";
+        private static readonly string PRE_SendCard = "/sendcard";
+        private static readonly string PRE_DemandCard = "/card";
+        private static readonly string PRE_ResetGame = "/reset";
+        private static readonly string PRE_CloseConnection = "/youshallnotpass";
+        #endregion
+
         private static List<string> wantStart = new List<string>();
+        private static List<List<string>> playerHands = new List<List<string>>();
         private static int idxCarta = 0;
+        private static int playerIdx = 0;
         private static bool isPlaying = false;
+
+        private Random random = new Random();
+        private static List<string> Baralla = Cards.GenerarBaralla();
+
+        private static int countdownSecs = 3;
 
         public static Thread thread;
         public static Thread tShowCards;
 
         private class SocketHandler : WebSocketHandler
         {
-
-            
 			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
 
-            #region Command prefixes
-            private static readonly string PRE_UsersOnline = "/online";
-            private static readonly string PRE_ShowCard = "/showcard";
-            private static readonly string PRE_StartGame = "/start";
-            private static readonly string PRE_SendCard = "/sendcard";
-            private static readonly string PRE_DemandCard = "/card";
-            private static readonly string PRE_ResetGame = "/reset";
-            private static readonly string PRE_CloseConnection = "/youshallnotpass";
-            #endregion
-
             private readonly string _nom;
-
-            private Random random = new Random();
-            private static List<string> Baralla = Cards.GenerarBaralla();
-            
-            private int countdownSecs = 3;
-
-            
-            
+            private readonly int _id;
 
             public SocketHandler(string nom)
             {
                 _nom = nom;
+                _id = playerIdx++;
             }
 
             public override void OnOpen()
@@ -148,6 +148,7 @@ namespace Poker_Server.Controllers
                     Sockets.Remove(this);
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
                     Sockets.Broadcast(_nom + " has disconnected."); // !!! quan està ple el que s'intenta connectar pero no hi ha lloc, si es desconnecta surt aixo igualment !!!
+                    playerIdx--;
                     if (thread != null && thread.IsAlive)
                     {
                         thread.Abort();
@@ -191,6 +192,12 @@ namespace Poker_Server.Controllers
                 isPlaying = true;
                 Sockets.Broadcast("Game started :)");
                 wantStart.Clear();
+
+                int i = 0;
+                foreach (var player in Sockets)
+				{
+                    
+				}
 
                 SendInitialCards();
                 tShowCards = new Thread(new ThreadStart(ShowCards));
