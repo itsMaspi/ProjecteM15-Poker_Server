@@ -36,7 +36,8 @@ namespace Poker_Server.Controllers
         #endregion
 
         private static List<string> wantStart = new List<string>();
-        private static List<List<string>> playerHands = new List<List<string>>();
+        // private static List<List<string>> playerHands = new List<List<string>>(6);
+        private static List<string>[] playerHands = new List<string>[6];
         private static List<int> playerIds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private static int idxCarta = 0;
         private static bool isPlaying = false;
@@ -133,9 +134,9 @@ namespace Poker_Server.Controllers
                         idxCarta--;
                         SendCard(this);
                         bool isFinished = true;
-                        foreach (List<string> hand in playerHands)
+						for (int i = 0; i < Sockets.Count; i++)
 						{
-							if (hand.Count < 5)
+							if (playerHands[i].Count < 5)
 							{
                                 isFinished = false;
 							}
@@ -211,10 +212,10 @@ namespace Poker_Server.Controllers
                 Sockets.Broadcast("Game started :)");
                 wantStart.Clear();
 
-                int i = 0;
-                foreach (var player in Sockets)
+                
+                for (int i = 0; i < playerHands.Length; i++)
 				{
-                    
+                    playerHands[i] = new List<string>(5);
 				}
 
                 SendInitialCards();
