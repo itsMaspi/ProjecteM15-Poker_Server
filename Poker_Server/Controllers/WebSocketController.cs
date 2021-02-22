@@ -132,8 +132,24 @@ namespace Poker_Server.Controllers
                         tShowCards.Abort();
                         idxCarta--;
                         SendCard(this);
-                        tShowCards = new Thread(new ThreadStart(ShowCards));
-                        tShowCards.Start();
+                        bool isFinished = true;
+                        foreach (List<string> hand in playerHands)
+						{
+							if (hand.Count < 5)
+							{
+                                isFinished = false;
+							}
+						}
+						if (isFinished)
+						{
+                            Sockets.Broadcast("Tothom esta ple...");
+                            // tots tenen 5 cartes, a contar :)
+						}
+                        else
+						{
+                            tShowCards = new Thread(new ThreadStart(ShowCards));
+                            tShowCards.Start();
+                        }
 					}
 				}
                 else
