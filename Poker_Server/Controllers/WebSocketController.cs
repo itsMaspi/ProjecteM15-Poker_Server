@@ -18,7 +18,7 @@ namespace Poker_Server.Controllers
         {
             // La crida al websocket serà del tipus   ws://host:port/api/websocket?nom=Pere
 
-            
+
             HttpContext.Current.AcceptWebSocketRequest(new SocketHandler(nom));
             return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
 
@@ -37,8 +37,8 @@ namespace Poker_Server.Controllers
 
         private static List<string> wantStart = new List<string>();
         private static List<List<string>> playerHands = new List<List<string>>();
+        private static List<int> playerIds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private static int idxCarta = 0;
-        private static int playerIdx = 0;
         private static bool isPlaying = false;
 
         private Random random = new Random();
@@ -59,7 +59,8 @@ namespace Poker_Server.Controllers
             public SocketHandler(string nom)
             {
                 _nom = nom;
-                _id = playerIdx++;
+                _id = playerIds[0];
+                playerIds.Remove(_id);
             }
 
             public override void OnOpen()
@@ -83,7 +84,7 @@ namespace Poker_Server.Controllers
                     }
                     Sockets.Broadcast(_nom + " has connected.");
                     Sockets.Add(this);
-                    Send("Connected!");
+                    Send("Connected! (" + _id + ")");
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
                     //Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
                     if (Sockets.Count == 2)
@@ -148,7 +149,8 @@ namespace Poker_Server.Controllers
                     Sockets.Remove(this);
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
                     Sockets.Broadcast(_nom + " has disconnected."); // !!! quan està ple el que s'intenta connectar pero no hi ha lloc, si es desconnecta surt aixo igualment !!!
-                    playerIdx--;
+                    playerIds.Add(_id);
+                    playerIds.Sort();
                     if (thread != null && thread.IsAlive)
                     {
                         thread.Abort();
