@@ -241,10 +241,10 @@ namespace Poker_Server.Controllers
                 if (idxCarta < Baralla.Count())
                 {
                     //Envia la carta al player
-                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta++));
-
+                    playerHands[player._id].Add(Baralla.ElementAt(idxCarta));
+                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta));
                     //Elimina aquesta carta de la baralla
-                    Baralla.RemoveAt(--idxCarta);
+                    Baralla.RemoveAt(idxCarta);
 
                 } else
 				{
