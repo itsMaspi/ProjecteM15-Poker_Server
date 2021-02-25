@@ -43,7 +43,7 @@ namespace Poker_Server.Controllers
         private static bool isPlaying = false;
 
         private Random random = new Random();
-        private static List<string> Baralla = Cards.GenerarBaralla();
+        private static List<Card> Baralla = Cards.GenerarBaralla();
 
         private static int countdownSecs = 3;
 
@@ -145,6 +145,7 @@ namespace Poker_Server.Controllers
 						{
                             Sockets.Broadcast("Tothom esta ple...");
                             // tots tenen 5 cartes, a contar :)
+                            GetResult();
 						}
                         else
 						{
@@ -187,6 +188,24 @@ namespace Poker_Server.Controllers
                     }
                 }
             }
+
+            private void GetResult()
+			{
+				for (int i = 0; i < Sockets.Count; i++)
+				{
+                    foreach (string carta in playerHands[i])
+					{
+                        Console.WriteLine(carta[carta.Length - 1]);
+					}
+                    var nose = playerHands[i].GroupBy(x => x);
+
+                    foreach (var c in nose)
+					{
+                        
+					}
+                    
+				}
+			}
 
             private string CountConnectedUsers()
             {
@@ -260,8 +279,8 @@ namespace Poker_Server.Controllers
                 if (idxCarta < Baralla.Count())
                 {
                     //Envia la carta al player
-                    playerHands[player._id].Add(Baralla.ElementAt(idxCarta));
-                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta));
+                    playerHands[player._id].Add(Baralla.ElementAt(idxCarta).ToString());
+                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta).ToString());
                     //Elimina aquesta carta de la baralla
                     Baralla.RemoveAt(idxCarta);
 
@@ -275,7 +294,7 @@ namespace Poker_Server.Controllers
 			{
 				if (idxCarta < Baralla.Count())
 				{
-                    Sockets.Broadcast(PRE_ShowCard + Baralla.ElementAt(idxCarta++));
+                    Sockets.Broadcast(PRE_ShowCard + Baralla.ElementAt(idxCarta++).ToString());
                 }
                 else
 				{

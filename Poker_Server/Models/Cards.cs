@@ -66,6 +66,30 @@ namespace Poker_Server.Models
 		public static string QueenClubs = "\U0001F0DD";
 		public static string KingClubs  = "\U0001F0DE";
 
+		public static Dictionary<string, string> pals = new Dictionary<string, string> {
+			{"Spades", "A" },
+			{"Hearts", "B" },
+			{"Diamonds", "C" },
+			{"Clubs", "D" }
+		};
+
+		public static Dictionary<int, string> valors = new Dictionary<int, string> {
+			{1, "2" },
+			{2, "3" },
+			{3, "4" },
+			{4, "5" },
+			{5, "6" },
+			{6, "7" },
+			{7, "8" },
+			{8, "9" },
+			{9, "A" },
+			{10, "B" },
+			{11, "C" },
+			{12, "D" },
+			{13, "E" },
+			{14, "1" }
+		};
+
 		public static string[] RedCards = { AceDiamonds,   AceHearts,
 											TwoDiamonds,   TwoHearts,
 											ThreeDiamonds, ThreeHearts,
@@ -94,37 +118,60 @@ namespace Poker_Server.Models
 											  QueenClubs ,   QueenSpades ,
 											  KingClubs  ,   KingSpades  };
 
-		public static List<string> GenerarBaralla()
+		public static List<Card> GenerarBaralla()
 		{
-			List<string> baralla = new List<string>();
-			baralla.AddRange(BlackCards);
-			baralla.AddRange(RedCards);
-			Random r = new Random();
-
-			for (int i = 0; i < baralla.Count; i++)
+			//List<string> baralla = new List<string>();
+			List<Card> baralla = new List<Card>();
+			int n = 0;
+			for (int i = 0; i < 13; i++)
 			{
-				int k = r.Next(baralla.Count-i);
+				baralla[n++] = new Card("Spades", i + 1);
+			}
+			for (int i = 0; i < 13; i++)
+			{
+				baralla[n++] = new Card("Hearts", i + 1);
+			}
+			for (int i = 0; i < 13; i++)
+			{
+				baralla[n++] = new Card("Diamonds", i + 1);
+			}
+			for (int i = 0; i < 13; i++)
+			{
+				baralla[n++] = new Card("Clubs", i + 1);
+			}
+
+
+			//baralla.AddRange(BlackCards);
+			//baralla.AddRange(RedCards);
+
+			/*for (int i = 0; i < baralla.Count; i++)
+			{
+				//int k = r.Next(baralla.Count-i);
+				int k = random(baralla.Count - i);
 				var t = baralla[k];
 				baralla[k] = baralla[i];
 				baralla[i] = t;
 			}
+			for (int i = 0; i < baralla.Count; i++)
+			{
+				//int k = r.Next(baralla.Count-i);
+				int k = random(baralla.Count - i);
+				var t = baralla[k];
+				baralla[k] = baralla[i];
+				baralla[i] = t;
+			}*/
 			return baralla;
 		}
-		
-		public static int randomNumber()
-        {
-			int random(int maxim) // random més variable que el de la funció Random
+
+		static int random(int maxim) // random més variable que el de la funció Random
+		{
+			using (RNGCryptoServiceProvider rg = new RNGCryptoServiceProvider())
 			{
-				using (RNGCryptoServiceProvider rg = new RNGCryptoServiceProvider())
-				{
-					byte[] rno = new byte[5];
-					rg.GetBytes(rno);
-					int randomvalue = BitConverter.ToInt32(rno, 0);
-					return Math.Abs(randomvalue) % maxim;
-				}
+				byte[] rno = new byte[5];
+				rg.GetBytes(rno);
+				int randomvalue = BitConverter.ToInt32(rno, 0);
+				return Math.Abs(randomvalue) % maxim;
 			}
-			return 0;
 		}
-	
 	}
 }
