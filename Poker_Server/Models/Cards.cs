@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
 
 namespace Poker_Server.Models
@@ -99,6 +100,7 @@ namespace Poker_Server.Models
 			baralla.AddRange(BlackCards);
 			baralla.AddRange(RedCards);
 			Random r = new Random();
+
 			for (int i = 0; i < baralla.Count; i++)
 			{
 				int k = r.Next(baralla.Count-i);
@@ -108,5 +110,21 @@ namespace Poker_Server.Models
 			}
 			return baralla;
 		}
+		
+		public static int randomNumber()
+        {
+			int random(int maxim) // random més variable que el de la funció Random
+			{
+				using (RNGCryptoServiceProvider rg = new RNGCryptoServiceProvider())
+				{
+					byte[] rno = new byte[5];
+					rg.GetBytes(rno);
+					int randomvalue = BitConverter.ToInt32(rno, 0);
+					return Math.Abs(randomvalue) % maxim;
+				}
+			}
+			return 0;
+		}
+	
 	}
 }
