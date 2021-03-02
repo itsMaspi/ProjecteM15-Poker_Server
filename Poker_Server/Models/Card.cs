@@ -10,23 +10,18 @@ namespace Poker_Server.Models
 	{
 		public string pal;
 		public int valor;
+		public string text;
 
-		public Card(string pal, int valor)
+		public Card(string pal, int valor, string text)
 		{
 			this.pal = pal;
 			this.valor = valor;
+			this.text = text;
 		}
 
 		public override string ToString()
 		{
-			//string pre = System.Text.RegularExpressions.Regex.Unescape("U0001F0");
-			Encoding unicode = Encoding.Unicode;
-			string test = "\\U0001F0{0}{1}";
-			string carta = "0001F0" + Cards.pals[pal] + Cards.valors[valor];
-			string s = string.Format(@"\U{0:x4}", carta);
-			//string s = string.Format("{0}{1}{2}", carta, Cards.pals[pal], Cards.valors[valor]);
-			return s;
-			// string.Concat("\\", carta, Cards.pals[pal], Cards.valors[valor])
+			return text;
 		}
 	}
 }
