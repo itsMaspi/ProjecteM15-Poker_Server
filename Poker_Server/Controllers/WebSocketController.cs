@@ -18,12 +18,8 @@ namespace Poker_Server.Controllers
         public HttpResponseMessage Get(string nom)
         {
             // La crida al websocket serà del tipus   ws://host:port/api/websocket?nom=Pere
-
-
             HttpContext.Current.AcceptWebSocketRequest(new SocketHandler(nom));
             return new HttpResponseMessage(HttpStatusCode.SwitchingProtocols);
-
-
         }
 
         #region Command prefixes
@@ -37,8 +33,7 @@ namespace Poker_Server.Controllers
         #endregion
 
         private static List<string> wantStart = new List<string>();
-        // private static List<List<string>> playerHands = new List<List<string>>(6);
-        private static List<string>[] playerHands = new List<string>[6];
+        private static List<Card>[] playerHands = new List<Card>[6];
         private static List<int> playerIds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private static int idxCarta = 0;
         private static bool isPlaying = false;
@@ -194,16 +189,7 @@ namespace Poker_Server.Controllers
 			{
 				for (int i = 0; i < Sockets.Count; i++)
 				{
-                    foreach (string carta in playerHands[i])
-					{
-                        Console.WriteLine(carta[carta.Length - 1]);
-					}
-                    var nose = playerHands[i].GroupBy(x => x);
-
-                    foreach (var c in nose)
-					{
-                        
-					}
+                    Sockets.Broadcast("Tothom ple, a contar! :)");
                     
 				}
 			}
@@ -235,7 +221,7 @@ namespace Poker_Server.Controllers
                 
                 for (int i = 0; i < playerHands.Length; i++)
 				{
-                    playerHands[i] = new List<string>(5);
+                    playerHands[i] = new List<Card>(5);
 				}
 
                 SendInitialCards();
@@ -270,7 +256,7 @@ namespace Poker_Server.Controllers
                 while (true)
 				{
                     ShowCard();
-                    Thread.Sleep(10000);
+                    Thread.Sleep(4000);
                 }
 			}
             
@@ -280,8 +266,8 @@ namespace Poker_Server.Controllers
                 if (idxCarta < Baralla.Count())
                 {
                     //Envia la carta al player
-                    playerHands[player._id].Add(Baralla.ElementAt(idxCarta).ToString());
-                    string json = JsonConvert.SerializeObject(Baralla.ElementAt(idxCarta));
+                    playerHands[player._id].Add(Baralla[idxCarta]);
+                    string json = JsonConvert.SerializeObject(Baralla[idxCarta]);
                     player.Send(PRE_SendCard + json);
                     Console.WriteLine(Baralla.ElementAt(idxCarta));
                     //Elimina aquesta carta de la baralla
@@ -297,7 +283,7 @@ namespace Poker_Server.Controllers
 			{
 				if (idxCarta < Baralla.Count())
 				{
-                    string json = JsonConvert.SerializeObject(Baralla.ElementAt(idxCarta++));
+                    string json = JsonConvert.SerializeObject(Baralla[idxCarta++]);
                     Sockets.Broadcast(PRE_ShowCard + json);
                 }
                 else
