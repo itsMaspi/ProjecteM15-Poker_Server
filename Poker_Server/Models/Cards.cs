@@ -121,24 +121,26 @@ namespace Poker_Server.Models
 		public static List<Card> GenerarBaralla()
 		{
 			//List<string> baralla = new List<string>();
-			List<Card> baralla = new List<Card>();
+			List<Card> baralla = new List<Card>(52);
+			
 			int n = 0;
 			for (int i = 0; i < 13; i++)
 			{
-				baralla[n++] = new Card("Spades", i + 1);
+				baralla.Add(new Card("Spades", i + 1));
 			}
 			for (int i = 0; i < 13; i++)
 			{
-				baralla[n++] = new Card("Hearts", i + 1);
+				baralla.Add(new Card("Hearts", i + 1));
 			}
 			for (int i = 0; i < 13; i++)
 			{
-				baralla[n++] = new Card("Diamonds", i + 1);
+				baralla.Add(new Card("Diamonds", i + 1));
 			}
 			for (int i = 0; i < 13; i++)
 			{
-				baralla[n++] = new Card("Clubs", i + 1);
+				baralla.Add(new Card("Clubs", i + 1));
 			}
+			Console.WriteLine(baralla[0].ToString());
 
 
 			//baralla.AddRange(BlackCards);

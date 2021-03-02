@@ -1,4 +1,5 @@
 ﻿using Microsoft.Web.WebSockets;
+using Newtonsoft.Json;
 using Poker_Server.Models;
 using System;
 using System.Collections.Generic;
@@ -280,7 +281,9 @@ namespace Poker_Server.Controllers
                 {
                     //Envia la carta al player
                     playerHands[player._id].Add(Baralla.ElementAt(idxCarta).ToString());
-                    player.Send(PRE_SendCard + Baralla.ElementAt(idxCarta).ToString());
+                    string json = JsonConvert.SerializeObject(Baralla.ElementAt(idxCarta));
+                    player.Send(PRE_SendCard + json);
+                    Console.WriteLine(Baralla.ElementAt(idxCarta));
                     //Elimina aquesta carta de la baralla
                     Baralla.RemoveAt(idxCarta);
 
@@ -294,7 +297,8 @@ namespace Poker_Server.Controllers
 			{
 				if (idxCarta < Baralla.Count())
 				{
-                    Sockets.Broadcast(PRE_ShowCard + Baralla.ElementAt(idxCarta++).ToString());
+                    string json = JsonConvert.SerializeObject(Baralla.ElementAt(idxCarta++));
+                    Sockets.Broadcast(PRE_ShowCard + json);
                 }
                 else
 				{
