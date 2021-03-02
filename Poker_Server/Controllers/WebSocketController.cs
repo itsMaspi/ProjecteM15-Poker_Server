@@ -256,7 +256,7 @@ namespace Poker_Server.Controllers
                 while (true)
 				{
                     ShowCard();
-                    Thread.Sleep(4000);
+                    Thread.Sleep(3495);
                 }
 			}
             
