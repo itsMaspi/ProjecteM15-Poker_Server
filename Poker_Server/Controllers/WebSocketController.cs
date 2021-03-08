@@ -141,7 +141,7 @@ namespace Poker_Server.Controllers
 						{
                             Sockets.Broadcast("Tothom esta ple...");
                             // tots tenen 5 cartes, a contar :)
-                            GetResult();
+                            GetWinner();
 						}
                         else
 						{
@@ -169,7 +169,6 @@ namespace Poker_Server.Controllers
                     {
                         thread.Abort();
                         Sockets.Broadcast("Countdown cancelled...");
-                        wantStart.Remove(_nom);
                     }
                     if (tShowCards != null && tShowCards.IsAlive)
                     {
@@ -182,16 +181,34 @@ namespace Poker_Server.Controllers
                         idxCarta = 0;
                         Baralla = Cards.GenerarBaralla();
                     }
+                    wantStart.Remove(_nom);
                 }
             }
 
-            private void GetResult()
+            struct Valors
+            {
+                public int qtyDif { get; set; }
+                public int maxValue { get; set; }
+            }
+
+            private void GetWinner()
 			{
+                List<int> jugades = new List<int>();
 				for (int i = 0; i < Sockets.Count; i++)
 				{
-                    Sockets.Broadcast("Tothom ple, a contar! :)");
-                    
-				}
+                    //Sockets.Broadcast("Tothom ple, a contar! :)");
+                    //TODO: parar el thread d'ensenyar cartes
+                    var valorsDiff = playerHands[i].GroupBy(x => x.valor).Select(x => x.Count()).OrderByDescending(x => x).ToList();
+                    Console.WriteLine(valorsDiff);
+
+
+                    var qtyDif = valorsDiff.Count();
+                    var maxValue = valorsDiff[0];
+
+                    int playValue = getPlayValue(qtyDif, maxValue);
+                    jugades.Add(playValue);
+                }
+                Sockets.Broadcast(jugades.ToString());
 			}
 
             private string CountConnectedUsers()
@@ -291,6 +308,86 @@ namespace Poker_Server.Controllers
                     idxCarta = 0;
 				}
 			}
+
+            private bool isCorrelative(List<int> list)
+			{
+                bool isCorrelative = true;
+                for (int n = 0; n < list.Count-1; n++)
+				{
+					if (list[n] + 1 != list[n+1])
+					{
+                        isCorrelative = false;
+                        break;
+					}
+				}
+                return isCorrelative;
+			}
+
+            private int getPlayValue(int qtyDif, int maxValue)
+			{
+                if (qtyDif == 2 && maxValue == 4)
+                {
+                    // poker
+                    return 7;
+                }
+                else if (qtyDif == 2 && maxValue == 3)
+                {
+                    // full
+                    return 6;
+                }
+                else if (qtyDif == 3 && maxValue == 3)
+                {
+                    // trio
+                    return 5;
+                }
+                else if (qtyDif == 3 && maxValue == 2)
+                {
+                    // doble parella
+                    return 4;
+                }
+                else if (qtyDif == 4 && maxValue == 2)
+                {
+                    // parella
+                    return 3;
+                }
+                else if (qtyDif == 5)
+                {
+                    bool isCorrelatiu = isCorrelative(playerHands[i].Select(x => x.valor).ToList());
+                    bool isMaxCorrelatiu = isCorrelatiu && playerHands[i].Max(x => x.valor) == 14;
+                    int palsDiff = playerHands[i].GroupBy(x => x.pal).Count();
+
+                    if (palsDiff == 1)
+                    {
+                        if (isMaxCorrelatiu)
+                        {
+                            // escala reial
+                            return 9;
+                        }
+                        else if (isCorrelatiu)
+                        {
+                            // escala de color
+                            return 8;
+                        }
+                        else if (!isMaxCorrelatiu && !isCorrelatiu)
+                        {
+                            // color
+                            return 5;
+                        }
+                    }
+                    else if (palsDiff > 1 && isCorrelatiu)
+                    {
+                        // escala
+                        return 4;
+                    }
+                    else
+                    {
+                        // res
+                        return 0;
+                    }
+
+                }
+                return -1;
+            }
         }
     }
 }
