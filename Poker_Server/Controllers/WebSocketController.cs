@@ -32,7 +32,7 @@ namespace Poker_Server.Controllers
         private static readonly string PRE_CloseConnection = "/youshallnotpass";
         #endregion
 
-        private static List<string> wantStart = new List<string>();
+        private static List<int> wantStart = new List<int>();
         private static List<Card>[] playerHands = new List<Card>[6];
         private static List<int> playerIds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private static int idxCarta = 0;
@@ -104,9 +104,9 @@ namespace Poker_Server.Controllers
                 }
                 else if (missatge.StartsWith(PRE_StartGame) && !isPlaying)
 				{
-					if (!wantStart.Contains(_nom))
+					if (!wantStart.Contains(_id))
 					{
-                        wantStart.Add(_nom);
+                        wantStart.Add(_id);
 					}
                     else
 					{
@@ -169,7 +169,7 @@ namespace Poker_Server.Controllers
                     {
                         thread.Abort();
                         Sockets.Broadcast("Countdown cancelled...");
-                        wantStart.Remove(_nom);
+                        wantStart.Remove(_id);
                     }
                     if (tShowCards != null && tShowCards.IsAlive)
                     {
