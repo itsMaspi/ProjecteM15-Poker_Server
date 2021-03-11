@@ -347,17 +347,17 @@ namespace Poker_Server.Controllers
                 else if (qtyDif == 3 && maxValue == 3)
                 {
                     // trio
-                    return 5;
+                    return 3;
                 }
                 else if (qtyDif == 3 && maxValue == 2)
                 {
                     // doble parella
-                    return 4;
+                    return 2;
                 }
                 else if (qtyDif == 4 && maxValue == 2)
                 {
                     // parella
-                    return 3;
+                    return 1;
                 }
                 else if (qtyDif == 5)
                 {
