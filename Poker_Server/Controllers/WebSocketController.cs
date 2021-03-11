@@ -37,6 +37,7 @@ namespace Poker_Server.Controllers
         private static List<int> playerIds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private static int idxCarta = 0;
         private static bool isPlaying = false;
+        private static SocketHandler winnerSocket;
 
         private Random random = new Random();
         private static List<Card> Baralla = Cards.GenerarBaralla();
@@ -51,7 +52,7 @@ namespace Poker_Server.Controllers
 			private static readonly WebSocketCollection Sockets = new WebSocketCollection();
 
             private readonly string _nom;
-            private readonly int _id;
+            public readonly int _id;
 
             public SocketHandler(string nom)
             {
@@ -185,22 +186,16 @@ namespace Poker_Server.Controllers
                 }
             }
 
-            struct Valors
-            {
-                public int qtyDif { get; set; }
-                public int maxValue { get; set; }
-            }
-
             private void GetWinner()
 			{
+                tShowCards.Abort();
                 List<int> jugades = new List<int>();
+                List<double> valorsFinals = new List<double>();
 				for (int i = 0; i < Sockets.Count; i++)
 				{
-                    //Sockets.Broadcast("Tothom ple, a contar! :)");
-                    //TODO: parar el thread d'ensenyar cartes
+                    // Ordenar la ma per vegades que apareix (desc) i valor (desc)
+                    playerHands[i] = playerHands[i].GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).OrderByDescending(o => o.valor).ToList();
                     var valorsDiff = playerHands[i].GroupBy(x => x.valor).Select(x => x.Count()).OrderByDescending(x => x).ToList();
-                    Console.WriteLine(valorsDiff);
-
 
                     var qtyDif = valorsDiff.Count();
                     var maxValue = valorsDiff[0];
@@ -211,13 +206,28 @@ namespace Poker_Server.Controllers
 
                     int playValue = getPlayValue(qtyDif, maxValue, isCorrelatiu, isMaxCorrelatiu, palsDiff);
                     jugades.Add(playValue);
+                    var ma = playerHands[i].GroupBy(x => x.valor).OrderByDescending(x => x.Key).Select(x => x.Key).ToList();
+                    string valorFinalStr = string.Format("{0}{1,2:00}{2,2:00}.", playValue, ma[0], ma[1]);
+                    ma.RemoveAt(1);
+                    ma.RemoveAt(0);
+					for (int c = 0; c < ma.Count; c++)
+					{
+                        valorFinalStr += string.Format("{0,2:00}", ma[c]);
+					}
+                    valorsFinals.Add(double.Parse(valorFinalStr));
                 }
-                string jugadesStr = "";
-                foreach (int jugada in jugades)
+                int idGuanyador = valorsFinals.IndexOf(valorsFinals.Max());
+                foreach (SocketHandler socket in Sockets)
 				{
-                    jugadesStr += jugada + ", ";
+                    if (socket._id == idGuanyador)
+					{
+                        winnerSocket = socket;
+                        break;
+					}
 				}
-                Sockets.Broadcast(jugadesStr);
+                
+                Sockets.Broadcast("Ha guanyat " + winnerSocket._nom + "!!!!");
+                winnerSocket.Send("Felicitats! :D");
 			}
 
             private string CountConnectedUsers()
