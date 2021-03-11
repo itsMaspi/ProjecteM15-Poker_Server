@@ -205,10 +205,19 @@ namespace Poker_Server.Controllers
                     var qtyDif = valorsDiff.Count();
                     var maxValue = valorsDiff[0];
 
-                    int playValue = getPlayValue(qtyDif, maxValue);
+                    bool isCorrelatiu = isCorrelative(playerHands[i].Select(x => x.valor).ToList());
+                    bool isMaxCorrelatiu = isCorrelatiu && playerHands[i].Max(x => x.valor) == 14;
+                    int palsDiff = playerHands[i].GroupBy(x => x.pal).Count();
+
+                    int playValue = getPlayValue(qtyDif, maxValue, isCorrelatiu, isMaxCorrelatiu, palsDiff);
                     jugades.Add(playValue);
                 }
-                Sockets.Broadcast(jugades.ToString());
+                string jugadesStr = "";
+                foreach (int jugada in jugades)
+				{
+                    jugadesStr += jugada + ", ";
+				}
+                Sockets.Broadcast(jugadesStr);
 			}
 
             private string CountConnectedUsers()
@@ -323,7 +332,7 @@ namespace Poker_Server.Controllers
                 return isCorrelative;
 			}
 
-            private int getPlayValue(int qtyDif, int maxValue)
+            private int getPlayValue(int qtyDif, int maxValue, bool isCorrelatiu, bool isMaxCorrelatiu, int palsDiff)
 			{
                 if (qtyDif == 2 && maxValue == 4)
                 {
@@ -352,10 +361,6 @@ namespace Poker_Server.Controllers
                 }
                 else if (qtyDif == 5)
                 {
-                    bool isCorrelatiu = isCorrelative(playerHands[i].Select(x => x.valor).ToList());
-                    bool isMaxCorrelatiu = isCorrelatiu && playerHands[i].Max(x => x.valor) == 14;
-                    int palsDiff = playerHands[i].GroupBy(x => x.pal).Count();
-
                     if (palsDiff == 1)
                     {
                         if (isMaxCorrelatiu)
