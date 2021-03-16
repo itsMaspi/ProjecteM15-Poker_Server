@@ -225,7 +225,7 @@ namespace Poker_Server.Controllers
                     playerHands[i] = new List<Card>(5);
 				}
 
-                SendInitialCards();
+                //SendInitialCards();
                 tShowCards = new Thread(new ThreadStart(ShowCards));
                 tShowCards.Start();
 			}
@@ -316,6 +316,7 @@ namespace Poker_Server.Controllers
                         valorFinalStr += string.Format("{0,2:00}", ma[c]);
                     }
                     valorsFinals.Add(double.Parse(valorFinalStr));
+                    Sockets.Broadcast($"Player {i}: {double.Parse(valorFinalStr)}, isCorrelatiu={isCorrelatiu}, isMaxCorrelatiu={isMaxCorrelatiu}");
                 }
                 int idGuanyador = valorsFinals.IndexOf(valorsFinals.Max());
                 foreach (SocketHandler socket in Sockets)
@@ -336,10 +337,9 @@ namespace Poker_Server.Controllers
                 bool isCorrelative = true;
                 for (int n = 0; n < list.Count-1; n++)
 				{
-					if (list[n] + 1 != list[n+1])
+					if (list[n] - 1 != list[n+1])
 					{
-                        isCorrelative = false;
-                        break;
+                        return false;
 					}
 				}
                 return isCorrelative;

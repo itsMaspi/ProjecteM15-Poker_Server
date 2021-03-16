@@ -85,7 +85,7 @@ namespace Poker_Server.Models
 			//baralla.AddRange(BlackCards);
 			//baralla.AddRange(RedCards);
 
-			for (int i = 0; i < baralla.Count; i++)
+			/*for (int i = 0; i < baralla.Count; i++)
 			{
 				//int k = r.Next(baralla.Count-i);
 				int k = random(baralla.Count - i);
@@ -100,7 +100,7 @@ namespace Poker_Server.Models
 				var t = baralla[k];
 				baralla[k] = baralla[i];
 				baralla[i] = t;
-			}
+			}*/
 			return baralla;
 		}
 
