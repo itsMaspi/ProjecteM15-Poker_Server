@@ -308,7 +308,7 @@ namespace Poker_Server.Controllers
                     int playValue = GetPlayValue(qtyDif, maxValue, isCorrelatiu, isMaxCorrelatiu, palsDiff);
                     jugades.Add(playValue);
                     var ma = playerHands[i].GroupBy(x => x.valor).OrderByDescending(x => x.Key).Select(x => x.Key).ToList();
-                    string valorFinalStr = string.Format("{0}{1,2:00}{2,2:00}.", playValue, ma[0], ma[1]);
+                    string valorFinalStr = string.Format("{0}{1,2:00}{2,2:00},", playValue, ma[0], ma[1]);
                     ma.RemoveAt(1);
                     ma.RemoveAt(0);
                     for (int c = 0; c < ma.Count; c++)
