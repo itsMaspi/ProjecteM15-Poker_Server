@@ -86,11 +86,11 @@ namespace Poker_Server.Controllers
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
                     if (Sockets.Count == 2)
                     {
-                        Sockets.Broadcast("You can start the game typing /start in the chat...");
+                        Sockets.Broadcast("You can start the game by clicking the start button...");
                     }
                     else if (Sockets.Count > 2)
 					{
-                        Send("You can start the game typing /start in the chat...");
+                        Send("You can start the game by clicking the start button...");
 					}
                 }
             }
@@ -316,7 +316,6 @@ namespace Poker_Server.Controllers
                         valorFinalStr += string.Format("{0,2:00}", ma[c]);
                     }
                     valorsFinals.Add(double.Parse(valorFinalStr));
-                    Sockets.Broadcast($"Player {i}: {double.Parse(valorFinalStr)}, isCorrelatiu={isCorrelatiu}, isMaxCorrelatiu={isMaxCorrelatiu}");
                 }
                 int idGuanyador = valorsFinals.IndexOf(valorsFinals.Max());
                 foreach (SocketHandler socket in Sockets)
