@@ -11,30 +11,6 @@ namespace Poker_Server.Models
 	{
 		public static string Cover       = "\U0001F0A0";
 
-		public static Dictionary<string, string> pals = new Dictionary<string, string> {
-			{"Spades", "A" },
-			{"Hearts", "B" },
-			{"Diamonds", "C" },
-			{"Clubs", "D" }
-		};
-
-		public static Dictionary<int, string> valors = new Dictionary<int, string> {
-			{1, "2" },
-			{2, "3" },
-			{3, "4" },
-			{4, "5" },
-			{5, "6" },
-			{6, "7" },
-			{7, "8" },
-			{8, "9" },
-			{9, "A" },
-			{10, "B" },
-			{11, "C" },
-			{12, "D" },
-			{13, "E" },
-			{14, "1" }
-		};
-
 		public static List<Card> GenerarBaralla()
 		{
 			//List<string> baralla = new List<string>();
@@ -46,42 +22,62 @@ namespace Poker_Server.Models
 
 			for (int i = 0; i < 13; i++)
 			{
+				var valor = i + 1;
 				if (i == 11)
 				{
 					b++;
 				}
 				bytes[2] = b++;
-				baralla.Add(new Card("Spades", i + 1, Encoding.Unicode.GetString(bytes)));
+				if (i == 0)
+				{
+					valor = 14;
+				}
+				baralla.Add(new Card("Spades", valor, Encoding.Unicode.GetString(bytes)));
 			}
 			b += 2;
 			for (int i = 0; i < 13; i++)
 			{
+				var valor = i + 1;
 				if (i == 11)
 				{
 					b++;
 				}
 				bytes[2] = b++;
-				baralla.Add(new Card("Hearts", i + 1, Encoding.Unicode.GetString(bytes)));
+				if (i == 0)
+				{
+					valor = 14;
+				}
+				baralla.Add(new Card("Hearts", valor, Encoding.Unicode.GetString(bytes)));
 			}
 			b += 2;
 			for (int i = 0; i < 13; i++)
 			{
+				var valor = i + 1;
 				if (i == 11)
 				{
 					b++;
 				}
 				bytes[2] = b++;
-				baralla.Add(new Card("Diamonds", i + 1, Encoding.Unicode.GetString(bytes)));
+				if (i == 0)
+				{
+					valor = 14;
+				}
+				baralla.Add(new Card("Diamonds", valor, Encoding.Unicode.GetString(bytes)));
 			}
 			b += 2;
 			for (int i = 0; i < 13; i++)
 			{
+				var valor = i + 1;
 				if (i == 11)
 				{
 					b++;
 				}
 				bytes[2] = b++;
-				baralla.Add(new Card("Clubs", i + 1, Encoding.Unicode.GetString(bytes)));
+				if (i == 0)
+				{
+					valor = 14;
+				}
+				baralla.Add(new Card("Clubs", valor, Encoding.Unicode.GetString(bytes)));
 			}
 			Console.WriteLine(baralla[0].ToString());
 

@@ -295,7 +295,7 @@ namespace Poker_Server.Controllers
                 for (int i = 0; i < Sockets.Count; i++)
                 {
                     // Ordenar la ma per vegades que apareix (desc) i valor (desc)
-                    playerHands[i] = playerHands[i].GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).OrderByDescending(o => o.valor).ToList();
+                    playerHands[i] = playerHands[i].GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).ToList();
                     var valorsDiff = playerHands[i].GroupBy(x => x.valor).Select(x => x.Count()).OrderByDescending(x => x).ToList();
 
                     var qtyDif = valorsDiff.Count();
