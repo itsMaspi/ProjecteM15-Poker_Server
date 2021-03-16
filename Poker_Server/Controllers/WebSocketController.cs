@@ -39,7 +39,6 @@ namespace Poker_Server.Controllers
         private static bool isPlaying = false;
         private static SocketHandler winnerSocket;
 
-        private Random random = new Random();
         private static List<Card> Baralla = Cards.GenerarBaralla();
 
         private static int countdownSecs = 3;
@@ -61,7 +60,8 @@ namespace Poker_Server.Controllers
                 playerIds.Remove(_id);
             }
 
-            public override void OnOpen()
+			#region Overrides
+			public override void OnOpen()
             {
 				if (Sockets.Count >= 6)
 				{
@@ -84,7 +84,6 @@ namespace Poker_Server.Controllers
                     Sockets.Add(this);
                     Send("Connected! (" + _id + ")");
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                    //Sockets.Broadcast("/showcard " + Baralla.ElementAt(random.Next(Baralla.Count)));
                     if (Sockets.Count == 2)
                     {
                         Sockets.Broadcast("You can start the game typing /start in the chat...");
@@ -140,7 +139,6 @@ namespace Poker_Server.Controllers
 						}
 						if (isFinished)
 						{
-                            Sockets.Broadcast("Tothom esta ple...");
                             // tots tenen 5 cartes, a contar :)
                             GetWinner();
 						}
@@ -163,7 +161,7 @@ namespace Poker_Server.Controllers
 				{
                     Sockets.Remove(this);
                     Sockets.Broadcast(PRE_UsersOnline + CountConnectedUsers());
-                    Sockets.Broadcast(_nom + " has disconnected."); // !!! quan està ple el que s'intenta connectar pero no hi ha lloc, si es desconnecta surt aixo igualment !!!
+                    Sockets.Broadcast(_nom + " has disconnected.");
                     playerIds.Add(_id);
                     playerIds.Sort();
                     if (thread != null && thread.IsAlive)
@@ -185,50 +183,7 @@ namespace Poker_Server.Controllers
                     wantStart.Remove(_id);
                 }
             }
-
-            private void GetWinner()
-			{
-                tShowCards.Abort();
-                List<int> jugades = new List<int>();
-                List<double> valorsFinals = new List<double>();
-				for (int i = 0; i < Sockets.Count; i++)
-				{
-                    // Ordenar la ma per vegades que apareix (desc) i valor (desc)
-                    playerHands[i] = playerHands[i].GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).OrderByDescending(o => o.valor).ToList();
-                    var valorsDiff = playerHands[i].GroupBy(x => x.valor).Select(x => x.Count()).OrderByDescending(x => x).ToList();
-
-                    var qtyDif = valorsDiff.Count();
-                    var maxValue = valorsDiff[0];
-
-                    bool isCorrelatiu = isCorrelative(playerHands[i].Select(x => x.valor).ToList());
-                    bool isMaxCorrelatiu = isCorrelatiu && playerHands[i].Max(x => x.valor) == 14;
-                    int palsDiff = playerHands[i].GroupBy(x => x.pal).Count();
-
-                    int playValue = getPlayValue(qtyDif, maxValue, isCorrelatiu, isMaxCorrelatiu, palsDiff);
-                    jugades.Add(playValue);
-                    var ma = playerHands[i].GroupBy(x => x.valor).OrderByDescending(x => x.Key).Select(x => x.Key).ToList();
-                    string valorFinalStr = string.Format("{0}{1,2:00}{2,2:00}.", playValue, ma[0], ma[1]);
-                    ma.RemoveAt(1);
-                    ma.RemoveAt(0);
-					for (int c = 0; c < ma.Count; c++)
-					{
-                        valorFinalStr += string.Format("{0,2:00}", ma[c]);
-					}
-                    valorsFinals.Add(double.Parse(valorFinalStr));
-                }
-                int idGuanyador = valorsFinals.IndexOf(valorsFinals.Max());
-                foreach (SocketHandler socket in Sockets)
-				{
-                    if (socket._id == idGuanyador)
-					{
-                        winnerSocket = socket;
-                        break;
-					}
-				}
-                
-                Sockets.Broadcast("Ha guanyat " + winnerSocket._nom + "!!!!");
-                winnerSocket.Send("Felicitats! :D");
-			}
+			#endregion
 
             private string CountConnectedUsers()
             {
@@ -248,6 +203,16 @@ namespace Poker_Server.Controllers
                 }
             }
 
+            private void Countdown()
+            {
+                for (int i = countdownSecs; i > 0; i--)
+                {
+                    Sockets.Broadcast("Starting the game in " + i);
+                    Thread.Sleep(1000);
+                }
+                StartGame();
+            }
+
             private void StartGame()
 			{
                 isPlaying = true;
@@ -263,41 +228,45 @@ namespace Poker_Server.Controllers
                 SendInitialCards();
                 tShowCards = new Thread(new ThreadStart(ShowCards));
                 tShowCards.Start();
-                
 			}
 
-            private void Countdown()
-			{
-				for (int i = countdownSecs; i > 0; i--)
-				{
-                    Sockets.Broadcast("Starting the game in " + i);
-                    Thread.Sleep(1000);
-				}
-                StartGame();
-			}
+            #region Show cards
+            private void ShowCards()
+            {
+                while (true)
+                {
+                    ShowCard();
+                    Thread.Sleep(3495);
+                }
+            }
 
+            private void ShowCard()
+            {
+                if (idxCarta < Baralla.Count())
+                {
+                    string json = JsonConvert.SerializeObject(Baralla[idxCarta++]);
+                    Sockets.Broadcast(PRE_ShowCard + json);
+                }
+                else
+                {
+                    idxCarta = 0;
+                }
+            }
+            #endregion
 
+            #region Send cards
             private void SendInitialCards()
             {
-				foreach (var player in Sockets)
-				{
+                foreach (var player in Sockets)
+                {
                     //Envia les dues cartes inicials al player
                     SendCard((SocketHandler)player);
                     SendCard((SocketHandler)player);
                 }
             }
 
-            private void ShowCards()
-			{
-                while (true)
-				{
-                    ShowCard();
-                    Thread.Sleep(3495);
-                }
-			}
-            
             private void SendCard(SocketHandler player)
-			{
+            {
                 //Comprova que no es surti de la baralla
                 if (idxCarta < Baralla.Count())
                 {
@@ -309,26 +278,60 @@ namespace Poker_Server.Controllers
                     //Elimina aquesta carta de la baralla
                     Baralla.RemoveAt(idxCarta);
 
-                } else
-				{
-                    idxCarta = 0;
-				}
-			}
-
-            private void ShowCard()
-			{
-				if (idxCarta < Baralla.Count())
-				{
-                    string json = JsonConvert.SerializeObject(Baralla[idxCarta++]);
-                    Sockets.Broadcast(PRE_ShowCard + json);
                 }
                 else
-				{
+                {
                     idxCarta = 0;
-				}
-			}
+                }
+            }
+            #endregion
 
-            private bool isCorrelative(List<int> list)
+            #region Get winner
+            private void GetWinner()
+            {
+                tShowCards.Abort();
+                List<int> jugades = new List<int>();
+                List<double> valorsFinals = new List<double>();
+                for (int i = 0; i < Sockets.Count; i++)
+                {
+                    // Ordenar la ma per vegades que apareix (desc) i valor (desc)
+                    playerHands[i] = playerHands[i].GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).OrderByDescending(o => o.valor).ToList();
+                    var valorsDiff = playerHands[i].GroupBy(x => x.valor).Select(x => x.Count()).OrderByDescending(x => x).ToList();
+
+                    var qtyDif = valorsDiff.Count();
+                    var maxValue = valorsDiff[0];
+
+                    bool isCorrelatiu = IsCorrelative(playerHands[i].Select(x => x.valor).ToList());
+                    bool isMaxCorrelatiu = isCorrelatiu && playerHands[i].Max(x => x.valor) == 14;
+                    int palsDiff = playerHands[i].GroupBy(x => x.pal).Count();
+
+                    int playValue = GetPlayValue(qtyDif, maxValue, isCorrelatiu, isMaxCorrelatiu, palsDiff);
+                    jugades.Add(playValue);
+                    var ma = playerHands[i].GroupBy(x => x.valor).OrderByDescending(x => x.Key).Select(x => x.Key).ToList();
+                    string valorFinalStr = string.Format("{0}{1,2:00}{2,2:00}.", playValue, ma[0], ma[1]);
+                    ma.RemoveAt(1);
+                    ma.RemoveAt(0);
+                    for (int c = 0; c < ma.Count; c++)
+                    {
+                        valorFinalStr += string.Format("{0,2:00}", ma[c]);
+                    }
+                    valorsFinals.Add(double.Parse(valorFinalStr));
+                }
+                int idGuanyador = valorsFinals.IndexOf(valorsFinals.Max());
+                foreach (SocketHandler socket in Sockets)
+                {
+                    if (socket._id == idGuanyador)
+                    {
+                        winnerSocket = socket;
+                        break;
+                    }
+                }
+
+                Sockets.Broadcast("Ha guanyat " + winnerSocket._nom + "!!!!");
+                winnerSocket.Send("Felicitats! :D");
+            }
+
+            private bool IsCorrelative(List<int> list)
 			{
                 bool isCorrelative = true;
                 for (int n = 0; n < list.Count-1; n++)
@@ -342,7 +345,7 @@ namespace Poker_Server.Controllers
                 return isCorrelative;
 			}
 
-            private int getPlayValue(int qtyDif, int maxValue, bool isCorrelatiu, bool isMaxCorrelatiu, int palsDiff)
+            private int GetPlayValue(int qtyDif, int maxValue, bool isCorrelatiu, bool isMaxCorrelatiu, int palsDiff)
 			{
                 if (qtyDif == 2 && maxValue == 4)
                 {
@@ -403,6 +406,8 @@ namespace Poker_Server.Controllers
                 }
                 return -1;
             }
+            #endregion
         }
+
     }
 }
