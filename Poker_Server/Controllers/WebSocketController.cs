@@ -295,7 +295,7 @@ namespace Poker_Server.Controllers
                 for (int i = 0; i < Sockets.Count; i++)
                 {
                     // Ordenar la ma per vegades que apareix (desc) i valor (desc)
-                    playerHands[i] = playerHands[i].GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).ToList();
+                    playerHands[i] = playerHands[i].OrderByDescending(x => x.valor).GroupBy(x => x.valor).OrderByDescending(g => g.Count()).SelectMany(g => g).ToList();
                     var valorsDiff = playerHands[i].GroupBy(x => x.valor).Select(x => x.Count()).OrderByDescending(x => x).ToList();
 
                     var qtyDif = valorsDiff.Count();
@@ -307,7 +307,7 @@ namespace Poker_Server.Controllers
 
                     int playValue = GetPlayValue(qtyDif, maxValue, isCorrelatiu, isMaxCorrelatiu, palsDiff);
                     jugades.Add(playValue);
-                    var ma = playerHands[i].GroupBy(x => x.valor).OrderByDescending(x => x.Key).Select(x => x.Key).ToList();
+                    var ma = playerHands[i].GroupBy(x => x.valor).Select(x => x.Key).ToList();
                     string valorFinalStr = string.Format("{0}{1,2:00}{2,2:00},", playValue, ma[0], ma[1]);
                     ma.RemoveAt(1);
                     ma.RemoveAt(0);
